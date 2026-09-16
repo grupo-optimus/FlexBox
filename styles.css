@@ -1,0 +1,423 @@
+/* ===========================================================
+   PARTE 3 · INVESTIGAÇÃO
+   ===========================================================
+
+   1) Qual é o eixo principal do .topo e qual é o do body? Por que são diferentes?
+      O eixo principal do .topo é horizontal (row, o padrão do flex), porque
+      é uma barra de navegação: logo, menu e botão precisam ficar lado a lado.
+      O eixo principal do body é vertical (column), porque body empilha
+      seções inteiras da página (topo, destaque, grade, rodapé) uma embaixo
+      da outra. São direções diferentes porque resolvem problemas diferentes:
+      um organiza itens numa barra, o outro organiza blocos numa página.
+
+   2) Por que flex: 1 1 280px dá um resultado diferente de width: 280px nos cards?
+      flex: 1 1 280px define 280px como flex-basis (tamanho de partida) e
+      ainda permite crescer (flex-grow: 1) e encolher (flex-shrink: 1)
+      conforme o espaço da linha. width: 280px é um valor rígido: o card
+      não cresce para preencher espaço sobrando nem encolhe de forma
+      flexível quando o espaço aperta, então a grade não se adapta tão bem
+      a diferentes larguras de tela.
+
+   3) O que acontece com a grade se flex-wrap: wrap virar nowrap?
+      Todos os cards são forçados a caber numa única linha, encolhendo
+      (flex-shrink) até estourarem sua largura mínima confortável — o
+      resultado normalmente é cards apertados demais ou uma barra de
+      rolagem horizontal na página.
+
+   4) Se align-items: center do topo for removido, o que muda?
+      Os itens do topo passam a usar o valor padrão (stretch), esticando-se
+      para ocupar toda a altura do .topo quando não têm altura própria, ou
+      alinhando pelo topo quando têm alturas fixas diferentes — isso
+      desalinha visualmente a logo (com imagem) em relação aos links de
+      texto e ao botão, que têm alturas naturais diferentes.
+
+   5) Onde o order pode atrapalhar quem navega por teclado?
+      No selo "Novo": ele é o último elemento no HTML, então a navegação
+      por Tab (e leitores de tela) chega até ele só depois do botão do
+      card, mesmo ele aparecendo visualmente antes do título. O order muda
+      só a ordem visual, nunca a ordem de leitura/tabulação, então quem
+      depende do teclado percebe uma ordem de leitura diferente da ordem
+      que vê na tela.
+   =========================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap");
+
+/* ===========================================================
+   PALETA — copiada do style.css real do projeto Optimus Study
+   (sem @import de layout, sem grid, sem position, sem @media:
+   só as cores e fontes foram reaproveitadas)
+   =========================================================== */
+:root {
+  --navy: #060d20;
+  --navy-2: #0e1b3f;
+  --panel: #101f45;
+  --panel-2: #16305f;
+  --border: #1f3d73;
+  --text: #dce3ec;
+  --muted: #95a3ba;
+  --red: #c8102e;
+  --red-bright: #ff3b3b;
+  --blue: #7fa6e8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  background: var(--navy);
+  color: var(--text);
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+/* ===========================================================
+   TOPO — logo à esquerda, menu ao lado, botão Entrar na ponta
+   =========================================================== */
+.topo {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 18px 32px;
+  background: rgba(6, 13, 32, 0.92);
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.logo img {
+  width: 40px;
+  height: 40px;
+}
+
+.logo-texto {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.logo-texto strong {
+  font-family: "Space Grotesk", sans-serif;
+  color: #fff;
+  font-size: 16px;
+}
+
+.logo-texto small {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+/* menu é um <ul> horizontal, flex dentro de flex.
+   margin-left:auto aqui (não justify-content) empurra o menu inteiro
+   para a direita, deixando só a logo colada na esquerda. */
+.menu {
+  display: flex;
+  gap: 24px;
+  list-style: none;
+  margin: 0 0 0 auto;
+  padding: 0;
+}
+
+.menu a {
+  color: #c9d2dd;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.menu a:hover {
+  color: #fff;
+}
+
+/* O botão é sempre o último elemento do .topo no HTML, então continua
+   sendo o item mais à direita mesmo que o menu ganhe novos links —
+   sem precisar de justify-content no .menu nem no .topo. */
+.botao-entrar {
+  flex-shrink: 0;
+  padding: 10px 22px;
+  border: 1px solid var(--red);
+  border-radius: 8px;
+  background: var(--red);
+  color: #fff;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.botao-entrar:hover {
+  background: #d91635;
+}
+
+/* ===========================================================
+   DESTAQUE — bloco central com altura própria
+   =========================================================== */
+.destaque {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 16px;
+  min-height: 360px;
+  padding: 64px 32px;
+  background: linear-gradient(180deg, var(--navy) 0%, #071129 100%);
+}
+
+.eyebrow {
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+}
+
+.destaque h1 {
+  max-width: 700px;
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+  color: #fff;
+  font-size: clamp(32px, 5vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -1px;
+}
+
+.destaque h1 span {
+  color: var(--red-bright);
+}
+
+.destaque p {
+  max-width: 560px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+/* ===========================================================
+   GRADE — no mínimo 6 cards, 24px entre eles nas duas direções
+   =========================================================== */
+.grade {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding: 40px 32px;
+  flex: 1;
+  align-content: flex-start;
+  background: #071129;
+}
+
+.card {
+  flex: 1 1 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.card-destaque {
+  flex: 2 1 280px;
+  background: var(--panel-2);
+  border-color: var(--red);
+}
+
+.card h3 {
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+  color: #fff;
+  font-size: 18px;
+}
+
+.card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* botão sempre grudado na base do card, mesmo com textos de tamanhos diferentes;
+   como flex-wrap dá a mesma altura de linha a todos os cards (stretch é o
+   padrão do eixo cruzado), os botões acabam alinhados na mesma linha entre si */
+.card button {
+  margin-top: auto;
+  align-self: flex-start;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--navy-2);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* selo "Novo": é o último elemento no HTML, mas aparece visualmente primeiro
+   dentro do card por causa do order negativo */
+.selo {
+  order: -1;
+  align-self: flex-start;
+  background: var(--red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+/* ===========================================================
+   RODAPÉ — três blocos: dois à esquerda, um na extrema direita
+   =========================================================== */
+.rodape {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 32px;
+  background: #050b19;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.rodape-linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.rodape-bloco {
+  display: flex;
+  gap: 12px;
+}
+
+.footer-brand img {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.footer-brand > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.footer-brand strong,
+.footer-product strong {
+  display: block;
+  color: #fff;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 16px;
+}
+
+.footer-brand p,
+.footer-product p {
+  font-size: 12px;
+  max-width: 300px;
+}
+
+.footer-product {
+  flex-direction: column;
+  gap: 2px;
+}
+
+.footer-label {
+  display: block;
+  color: #6d83a9;
+  font-size: 10px;
+  letter-spacing: 1.4px;
+}
+
+/* só este bloco recebe margin-left:auto — não é uma margin fixa entre
+   blocos, é o espaço livre do flex sendo empurrado para o último item */
+.footer-tech {
+  flex-direction: column;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.tech-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tech-list span {
+  font-size: 10px;
+  font-weight: 700;
+  color: #b8c4d6;
+  padding: 5px 8px;
+  background: #0b1733;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+
+.team-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px 0;
+  border-top: 1px solid rgba(127, 166, 232, 0.13);
+  border-bottom: 1px solid rgba(127, 166, 232, 0.13);
+}
+
+.team-title {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+
+.team-title span {
+  font-size: 10px;
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+}
+
+.team-title small {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.team-avatars {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.team-avatars img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #050b19;
+  background: var(--navy-2);
+}
+
+.footer-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 11px;
+  color: #657694;
+}
