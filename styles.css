@@ -88,10 +88,18 @@ button {
 /* ===========================================================
    TOPO — logo à esquerda, menu ao lado, botão Entrar na ponta
    =========================================================== */
+/* flex-wrap: wrap deixa o topo quebrar em vez de estourar a largura da tela:
+   a logo e o botão têm flex-shrink: 0 e o menu não encolhe abaixo do próprio
+   min-content, então sem o wrap as peças somam ~470px e vazam num celular.
+   O justify-content: center só age nas linhas quebradas — no desktop o
+   margin-left: auto do .menu absorve toda a sobra antes dele, e nada muda.
+   O primeiro valor do gap (10px) é o espaço ENTRE as linhas quebradas. */
 .topo {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 24px;
+  justify-content: center;
+  gap: 10px 18px;
   padding: 18px 32px;
   background: rgba(6, 13, 32, 0.92);
   border-bottom: 1px solid var(--border);
